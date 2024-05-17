@@ -11,7 +11,10 @@ import org.iesvdm.appointment.service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -81,6 +84,15 @@ public class ExchangeServiceImplTest {
      */
     @Test
     void checkIfEligibleForExchange() {
+    Customer customer3 = new Customer(3
+                ,"adrian"
+                , "1234"
+                , new ArrayList<>());
+    appointment1.setCustomer(customer3);
+    appointment1.setId(3);
+
+    when(appointmentRepository.getOne(3)).thenReturn(appointment1);
+    assertThat(exchangeService.checkIfEligibleForExchange(3,3)).isTrue();
 
     }
 
@@ -96,7 +108,12 @@ public class ExchangeServiceImplTest {
      */
     @Test
     void getEligibleAppointmentsForExchangeTest() {
-
+        appointment2.setId(2);
+        appointmentRepository.save(appointment2);
+        appointment1.setId(1);
+        appointmentRepository.save(appointment1);
+        exchangeService.getEligibleAppointmentsForExchange(1);
+        verify(appointmentRepository).getOne(appointmentIdCaptor.capture());
     }
 
     /**
@@ -106,7 +123,11 @@ public class ExchangeServiceImplTest {
      */
     @Test
     void checkIfExchangeIsPossibleTest() {
-
+        appointment1.setId(1);
+        appointmentRepository.save(appointment1);
+        assertThatThrownBy(() -> exchangeService.checkIfExchangeIsPossible(1,1,2))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Unauthorized");
     }
 
     /**
@@ -120,6 +141,14 @@ public class ExchangeServiceImplTest {
      */
      void rejectExchangeTest() {
 
+         Customer customer3 = new Customer(3
+                 ,"adrian"
+                 , "1234"
+                 , new ArrayList<>());
+         appointment1.setCustomer(customer3);
+         appointment1.setId(3);
+
+         when(appointmentRepository.getOne(3)).thenReturn(appointment1);
      }
 
 }
